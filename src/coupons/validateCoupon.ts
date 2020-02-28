@@ -22,6 +22,10 @@ export const handler: Handler = async (evt: APIGatewayEvent, _ctx: Context) => {
   if (error) {
     return {
       statusCode: 400,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true
+      },
       body: JSON.stringify({
         success: false,
         message: error.details
@@ -46,6 +50,10 @@ export const handler: Handler = async (evt: APIGatewayEvent, _ctx: Context) => {
     if (result && result.Items && result.Items.length === 0) {
       return {
         statusCode: 404,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Credentials": true
+        },
         body: JSON.stringify({
           valid: false,
           discount: 0,
@@ -59,6 +67,10 @@ export const handler: Handler = async (evt: APIGatewayEvent, _ctx: Context) => {
     if (end_date < Date.now()) {
       return {
         statusCode: 406,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Credentials": true
+        },
         body: JSON.stringify({
           valid: false,
           discount: 0,
@@ -71,6 +83,10 @@ export const handler: Handler = async (evt: APIGatewayEvent, _ctx: Context) => {
     if (total_amount < minimum_amount) {
       return {
         statusCode: 406,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Credentials": true
+        },
         body: JSON.stringify({
           valid: false,
           discount: 0,
@@ -84,6 +100,10 @@ export const handler: Handler = async (evt: APIGatewayEvent, _ctx: Context) => {
       const flatDiscount = await resolveFlatDiscount(coupon_id);
       return {
         statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Credentials": true
+        },
         body: JSON.stringify(flatDiscount)
       };
     }
@@ -96,6 +116,10 @@ export const handler: Handler = async (evt: APIGatewayEvent, _ctx: Context) => {
       );
       return {
         statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Credentials": true
+        },
         body: JSON.stringify(percentDiscount)
       };
     }

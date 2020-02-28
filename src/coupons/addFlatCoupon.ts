@@ -87,6 +87,10 @@ export const handler: Handler = async (
     await dynamoDb.batchWrite(params).promise();
     return {
       statusCode: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true
+      },
       body: JSON.stringify({
         success: true,
         message: "Flat Coupon added successfully!"
@@ -96,6 +100,10 @@ export const handler: Handler = async (
     if (err)
       return {
         statusCode: 500,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Credentials": true
+        },
         body: JSON.stringify({
           sucess: false,
           message: err.message

@@ -26,10 +26,7 @@ provider:
   name: aws
   runtime: nodejs12.x
   region: us-east-2
-  apiGateway:
-    minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
   environment:
-    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
     CouponsTable: coupons
     FlatDiscountTable: flatdiscount
     PercentDiscountTable: percentdiscount
@@ -45,31 +42,67 @@ provider:
       Resource: "*"
 
 functions:
+  hello:
+    handler: handler.hello
+    events:
+      - http:
+          method: get
+          path: aws/hello
   addFlatCoupon:
     handler: src/coupons/addFlatCoupon.handler
     events:
       - http:
           method: post
           path: aws/add-flat-coupon
+          cors:
+            origin: "*" # <-- Specify allowed origin
+            headers: # <-- Specify allowed headers
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+            allowCredentials: false
   addPercentCoupon:
     handler: src/coupons/addPercentCoupon.handler
     events:
       - http:
           method: post
           path: aws/add-percent-coupon
+          cors:
+            origin: "*" # <-- Specify allowed origin
+            headers: # <-- Specify allowed headers
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+            allowCredentials: false
   validateCoupon:
     handler: src/coupons/validateCoupon.handler
     events:
       - http:
           method: post
           path: aws/validate
+          cors:
+            origin: "*" # <-- Specify allowed origin
+            headers: # <-- Specify allowed headers
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+            allowCredentials: false
 
 resources:
   Resources:
-    CouponsTable:
+    CouponsDynamoDBTable:
       Type: "AWS::DynamoDB::Table"
       Properties:
-        TableName: "coupons"
+        TableName: ${self:provider.environment.CouponsTable}
         AttributeDefinitions:
           - AttributeName: coupon_id
             AttributeType: S
@@ -79,8 +112,8 @@ resources:
           - AttributeName: coupon_id
             KeyType: HASH
         ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+          ReadCapacityUnits: 3
+          WriteCapacityUnits: 3
         GlobalSecondaryIndexes:
           - IndexName: coupons_index
             KeySchema:
@@ -93,12 +126,12 @@ resources:
                 - discount_type
               ProjectionType: INCLUDE
             ProvisionedThroughput:
-              ReadCapacityUnits: "1"
-              WriteCapacityUnits: "1"
-    FlatDiscountTable:
+              ReadCapacityUnits: 3
+              WriteCapacityUnits: 3
+    FlatDiscountDynamoDBTable:
       Type: "AWS::DynamoDB::Table"
       Properties:
-        TableName: "flatdiscount"
+        TableName: ${self:provider.environment.FlatDiscountTable}
         AttributeDefinitions:
           - AttributeName: coupon_id
             AttributeType: S
@@ -106,12 +139,12 @@ resources:
           - AttributeName: coupon_id
             KeyType: HASH
         ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-    PercentDiscountTable:
+          ReadCapacityUnits: 3
+          WriteCapacityUnits: 3
+    PercentDiscountDynamoDBTable:
       Type: "AWS::DynamoDB::Table"
       Properties:
-        TableName: "percentdiscount"
+        TableName: ${self:provider.environment.PercentDiscountTable}
         AttributeDefinitions:
           - AttributeName: coupon_id
             AttributeType: S
@@ -119,5 +152,5 @@ resources:
           - AttributeName: coupon_id
             KeyType: HASH
         ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+          ReadCapacityUnits: 3
+          WriteCapacityUnits: 3
