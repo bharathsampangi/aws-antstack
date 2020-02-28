@@ -1,0 +1,123 @@
+service:
+  name: aws-antstack
+# app and org for use with dashboard.serverless.com
+#app: your-app-name
+#org: your-org-name
+
+custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+  dynamodb:
+    start:
+      port: 8000
+      migrate: true # please create the tables
+      inMemory: true
+      onStart: true
+    stages: -dev
+
+# Add the serverless-webpack plugin
+plugins:
+  - serverless-webpack
+  - serverless-offline
+  - serverless-dynamodb-local
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: us-east-2
+  apiGateway:
+    minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    CouponsTable: coupons
+    FlatDiscountTable: flatdiscount
+    PercentDiscountTable: percentdiscount
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "*"
+
+functions:
+  addFlatCoupon:
+    handler: src/coupons/addFlatCoupon.handler
+    events:
+      - http:
+          method: post
+          path: aws/add-flat-coupon
+  addPercentCoupon:
+    handler: src/coupons/addPercentCoupon.handler
+    events:
+      - http:
+          method: post
+          path: aws/add-percent-coupon
+  validateCoupon:
+    handler: src/coupons/validateCoupon.handler
+    events:
+      - http:
+          method: post
+          path: aws/validate
+
+resources:
+  Resources:
+    CouponsTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: "coupons"
+        AttributeDefinitions:
+          - AttributeName: coupon_id
+            AttributeType: S
+          - AttributeName: coupon_code
+            AttributeType: S
+        KeySchema:
+          - AttributeName: coupon_id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        GlobalSecondaryIndexes:
+          - IndexName: coupons_index
+            KeySchema:
+              - AttributeName: coupon_code
+                KeyType: HASH
+            Projection:
+              NonKeyAttributes:
+                - minimum_amount
+                - end_date
+                - discount_type
+              ProjectionType: INCLUDE
+            ProvisionedThroughput:
+              ReadCapacityUnits: "1"
+              WriteCapacityUnits: "1"
+    FlatDiscountTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: "flatdiscount"
+        AttributeDefinitions:
+          - AttributeName: coupon_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: coupon_id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    PercentDiscountTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: "percentdiscount"
+        AttributeDefinitions:
+          - AttributeName: coupon_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: coupon_id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
