@@ -39,6 +39,7 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
+        - dynamodb:BatchWriteItem
       Resource: "*"
 
 functions:
@@ -55,15 +56,7 @@ functions:
           method: post
           path: aws/add-flat-coupon
           cors:
-            origin: "*" # <-- Specify allowed origin
-            headers: # <-- Specify allowed headers
-              - Content-Type
-              - X-Amz-Date
-              - Authorization
-              - X-Api-Key
-              - X-Amz-Security-Token
-              - X-Amz-User-Agent
-            allowCredentials: false
+            origin: "*"
   addPercentCoupon:
     handler: src/coupons/addPercentCoupon.handler
     events:
@@ -71,15 +64,7 @@ functions:
           method: post
           path: aws/add-percent-coupon
           cors:
-            origin: "*" # <-- Specify allowed origin
-            headers: # <-- Specify allowed headers
-              - Content-Type
-              - X-Amz-Date
-              - Authorization
-              - X-Api-Key
-              - X-Amz-Security-Token
-              - X-Amz-User-Agent
-            allowCredentials: false
+            origin: "*"
   validateCoupon:
     handler: src/coupons/validateCoupon.handler
     events:
@@ -87,19 +72,11 @@ functions:
           method: post
           path: aws/validate
           cors:
-            origin: "*" # <-- Specify allowed origin
-            headers: # <-- Specify allowed headers
-              - Content-Type
-              - X-Amz-Date
-              - Authorization
-              - X-Api-Key
-              - X-Amz-Security-Token
-              - X-Amz-User-Agent
-            allowCredentials: false
+            origin: "*"
 
 resources:
   Resources:
-    GatewayResponseDefault4XX:
+    GatewayResponseDefault4XX: #Cors for AWS ApiGateway
       Type: "AWS::ApiGateway::GatewayResponse"
       Properties:
         ResponseParameters:
