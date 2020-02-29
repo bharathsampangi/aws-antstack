@@ -41,6 +41,16 @@ export const handler: Handler = async (
   const discount_id = "flat-" + uuidv4();
   const { coupon_code, minimum_amount, discount_amount, validity } = data;
 
+  if (minimum_amount < 0 || discount_amount < 0) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        success: false,
+        message: "Negative values found in input"
+      })
+    };
+  }
+
   const start_date = new Date().getTime();
   let end = new Date();
   end.setDate(end.getDate() + validity);

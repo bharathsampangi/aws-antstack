@@ -52,6 +52,16 @@ export const handler: Handler = async (
     maximum_amount
   } = data;
 
+  if (minimum_amount < 0 || maximum_amount < 0) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        success: false,
+        message: "Negative values found in input"
+      })
+    };
+  }
+
   const start_date = new Date();
   let end_date = new Date();
   end_date.setDate(end_date.getDate() + validity);

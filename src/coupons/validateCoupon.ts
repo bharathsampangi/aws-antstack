@@ -35,6 +35,20 @@ export const handler: Handler = async (evt: APIGatewayEvent, _ctx: Context) => {
 
   const { coupon_code, total_amount } = data;
 
+  if (total_amount < 0) {
+    return {
+      statusCode: 400,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true
+      },
+      body: JSON.stringify({
+        success: false,
+        message: "Total amount should be greater than zero."
+      })
+    };
+  }
+
   const params = {
     TableName: "coupons",
     IndexName: "coupons_index",
