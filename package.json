@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@hapi/joi": "^17.1.0",
-    "aws-sdk": "^2.626.0",
+    "aws-sdk": "^2.814.0",
     "serverless": "^1.64.1",
     "source-map-support": "^0.5.10",
     "uuid": "^7.0.1"
